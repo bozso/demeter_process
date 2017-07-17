@@ -54,7 +54,7 @@ def validate_paths(file_with_paths, auth_word):
 
     return 0
 
-def read_data(input_file_paths, required='all'):
+def read_data(input_paths, required='all'):
 
     """Reads binary data"""
 
@@ -62,8 +62,7 @@ def read_data(input_file_paths, required='all'):
 
     shift = 0
 
-    with open(input_file_paths) as f:
-        lengths = [os.path.getsize(line.rstrip()) // 312 for line in f]
+    lengths = [os.path.getsize(line.rstrip()) // 312 for line in input_paths]
     
     lengths.reverse()
 
@@ -81,20 +80,18 @@ def read_data(input_file_paths, required='all'):
         sub_dt = [(req, iap_struct[req]) for req in required]
         data = np.empty(shape = num_of_rows, dtype=sub_dt)
 
-    with open(input_file_paths) as f:
+    for line in input_paths:
 
-        for line in f:
+        input_file = open(line.rstrip(), "rb")
 
-            input_file = open(line.rstrip(), "rb")
+        rows = lengths.pop()
 
-            rows = lengths.pop()
-            
-            if required == 'all':
-                data[shift:shift+rows] = np.fromfile(input_file, iap_struct, rows)
-            else:                                                                    
-                data[shift:shift+rows] = np.fromfile(input_file, iap_struct, rows)[required]
-                                                                                
-            shift += rows
+        if required == 'all':
+            data[shift:shift+rows] = np.fromfile(input_file, iap_struct, rows)
+        else:                                                                    
+            data[shift:shift+rows] = np.fromfile(input_file, iap_struct, rows)[required]
+
+        shift += rows
 
     data['cnesjd'] %= 16777216
 
