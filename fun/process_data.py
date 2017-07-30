@@ -60,13 +60,15 @@ def read_data(input_paths, required='all'):
 
     import os
 
-    shift = 0
-
-    lengths = [os.path.getsize(line.rstrip()) // 312 for line in input_paths]
+    shift = 0.0
     
-    lengths.reverse()
-
-    num_of_rows = sum(lengths)
+    num_of_rows = sum([os.path.getsize(line.rstrip()) // 312
+                       for line in input_paths])
+    
+#    lengths = [os.path.getsize(line.rstrip()) // 312
+#                       for line in input_paths]
+    
+#    lengths.reverse()
     
     if 'sub_orb_type' not in required:
         required.append('sub_orb_type')
@@ -80,18 +82,30 @@ def read_data(input_paths, required='all'):
         sub_dt = [(req, iap_struct[req]) for req in required]
         data = np.empty(shape = num_of_rows, dtype=sub_dt)
 
-    for line in input_paths:
+    
+    if required == 'all':
+        data = np.asarray( [ np.fromfile(open(line.rstrip(), 'rb'), 
+                                        iap_struct,
+                                        os.path.getsize(line.rstrip()) // 312)
+                                        for line in input_paths ] )
+    else:                                                                    
+        data = np.asarray( [
+               np.fromfile(open(line.rstrip(), 'rb'), iap_struct,
+                           os.path.getsize(line.rstrip()) // 312)[required]
+                           for line in input_paths ] )
 
-        input_file = open(line.rstrip(), "rb")
-
-        rows = lengths.pop()
-
-        if required == 'all':
-            data[shift:shift+rows] = np.fromfile(input_file, iap_struct, rows)
-        else:                                                                    
-            data[shift:shift+rows] = np.fromfile(input_file, iap_struct, rows)[required]
-
-        shift += rows
+#    for line in input_paths:
+#
+#        input_file = open(line.rstrip(), "rb")
+#
+#        rows = lengths.pop()
+#
+#        if required == 'all':
+#            data[shift:shift+rows] = np.fromfile(input_file, iap_struct, rows)
+#        else:                                                                    
+#            data[shift:shift+rows] = np.fromfile(input_file, iap_struct, rows)[required]
+#
+#        shift += rows
 
     data['cnesjd'] %= 16777216
 
