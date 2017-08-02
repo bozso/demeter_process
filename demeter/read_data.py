@@ -39,14 +39,12 @@ def validate_paths(file_with_paths, auth_word):
 
     return 0
 
-def read_data(input_paths, required='all'):
+def read_data(input_paths, required='all', corr_lon=False):
 
     """Reads binary data"""
 
     import os
 
-    shift = 0.0
-            
     if 'sub_orb_type' not in required and required != 'all':
         required.append('sub_orb_type')
     
@@ -66,6 +64,15 @@ def read_data(input_paths, required='all'):
 
     
     data = np.concatenate(data)
+    
+    if corr_lon:
+        lons = ['mlon', 'glon', 'cglon', 'nglon', 'sglon']
+        fieldnames = data.dtype.names
+
+        for lon in lons:
+            if lon in fieldnames:
+                data[lon][data[lon] > 180.0] -= 360
+
     
     data['cnesjd'] %= 16777216
 
