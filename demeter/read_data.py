@@ -2,40 +2,38 @@ import numpy as np
 from numpy.lib import recfunctions
 from jdcal import gcal2jd
 
-def validate_paths(file_with_paths, auth_word):
+#def read_auth_word(filepath):
+    
+    #input_file = open(filepath, "rb")
+    #input_file.seek(204)
+    
+    #auth word = input_file.read(10)
+    
+    #input_file.close()
+    
+    #return auth_word
+    
+def validate_paths(input_paths, auth_word):
 
     """Validating filepaths. Checking file size and data type"""
 
     import os
 
-    with open(file_with_paths) as f:
-        content = f.readlines()
-
-    content = ("".join(content)).rstrip()
-
-    input_file_paths = content.splitlines()
-
-    num_of_files = len(input_file_paths)
-
-    # Validating filepaths
-    for iii in range(num_of_files):
-
-        size_in_bytes = os.path.getsize(input_file_paths[iii])
-
-        if size_in_bytes % 312:
-            print("data_read: Error: Filesize is not adequate!")
-            print("data_read: At file: ", input_file_paths[iii])
-            return 1
-        else:
-            input_file = open(input_file_paths[iii], "rb")
-            input_file.seek(204)
-
-        if input_file.read(10) != auth_word:
-            print("data_read: Error: Data types do not match!")
-            print("data_read: At file: ", input_file_paths[iii])
-            return 1
-        else:
-            input_file.close()
+    rem_size = [os.path.getsize(lin) % 312 for line in input_paths]
+    
+    if np.any(rem_size):
+        print("data_read: Error: Filesize is not adequate!")
+        
+        return 1
+    
+    
+    auth_words = [read_auth_word(line) for line in input_paths]
+    
+    
+    if np.not_equal(auth_word, auth_words):
+        print("data_read: Error: Data types do not match!")
+        
+        return 1
 
     return 0
 
@@ -88,7 +86,8 @@ def read_data(input_paths, required='all', corr_lon=False):
                      data['msec_of_day'].astype(np.double) / 86400000
 
             data = recfunctions.drop_fields(data, ['cnesjd', 
-                                            'msec_of_day'], usemask=False)
+                                            'msec_of_day'],
+                                            usemask=False)
 
             data = recfunctions.append_fields(data, 'cnesjd', cnesjd,
             dtypes=np.double, usemask=False)
@@ -107,30 +106,30 @@ def read_data(input_paths, required='all', corr_lon=False):
 def process_line(line_str):
     
     return [
-    int(line_str[12:14]), # Kp for 0000 - 0300 UT. -- 0
-    int(line_str[14:16]), # Kp for 0300 - 0600 UT. -- 1
-    int(line_str[16:18]), # Kp for 0600 - 0900 UT. -- 2
-    int(line_str[18:20]), # Kp for 0900 - 1200 UT. -- 3
-    int(line_str[20:22]), # Kp for 1200 - 1500 UT. -- 4
-    int(line_str[22:24]), # Kp for 1500 - 1800 UT. -- 5
-    int(line_str[24:26]), # Kp for 1800 - 2100 UT. -- 6
-    int(line_str[26:28]), # Kp for 2100 - 2400 UT. -- 7
-    int(line_str[28:31]), # SUM of the eight Kp indices for the day
-                          # expressed to the near-est third of a unit.
-                          #  -- 8
-    int(line_str[31:34]), # ap for 0000 - 0300 UT. -- 9
-    int(line_str[34:37]), # ap for 0300 - 0600 UT. -- 10
-    int(line_str[37:40]), # ap for 0600 - 0900 UT. -- 11
-    int(line_str[40:43]), # ap for 0900 - 1200 UT. -- 12
-    int(line_str[43:46]), # ap for 1200 - 1500 UT. -- 13
-    int(line_str[46:49]), # ap for 1500 - 1800 UT. -- 14
-    int(line_str[49:52]), # ap for 1800 - 2100 UT. -- 15
-    int(line_str[52:55]), # ap for 2100 - 2400 UT. -- 16
-    int(line_str[55:58]), # Ap or PLANETARY EQUIVALENT DAILY
-                          # AMPLITUDE--the arithmetic mean -- 17
+    int(line_str[12:14]),   # Kp for 0000 - 0300 UT. -- 0
+    int(line_str[14:16]),   # Kp for 0300 - 0600 UT. -- 1
+    int(line_str[16:18]),   # Kp for 0600 - 0900 UT. -- 2
+    int(line_str[18:20]),   # Kp for 0900 - 1200 UT. -- 3
+    int(line_str[20:22]),   # Kp for 1200 - 1500 UT. -- 4
+    int(line_str[22:24]),   # Kp for 1500 - 1800 UT. -- 5
+    int(line_str[24:26]),   # Kp for 1800 - 2100 UT. -- 6
+    int(line_str[26:28]),   # Kp for 2100 - 2400 UT. -- 7
+    int(line_str[28:31]),   # SUM of the eight Kp indices for the day
+                            # expressed to the near-est third of a unit.
+                            #  -- 8
+    int(line_str[31:34]),   # ap for 0000 - 0300 UT. -- 9
+    int(line_str[34:37]),   # ap for 0300 - 0600 UT. -- 10
+    int(line_str[37:40]),   # ap for 0600 - 0900 UT. -- 11
+    int(line_str[40:43]),   # ap for 0900 - 1200 UT. -- 12
+    int(line_str[43:46]),   # ap for 1200 - 1500 UT. -- 13
+    int(line_str[46:49]),   # ap for 1500 - 1800 UT. -- 14
+    int(line_str[49:52]),   # ap for 1800 - 2100 UT. -- 15
+    int(line_str[52:55]),   # ap for 2100 - 2400 UT. -- 16
+    int(line_str[55:58]),   # Ap or PLANETARY EQUIVALENT DAILY
+                            # AMPLITUDE--the arithmetic mean -- 17
     float(line_str[58:61]), # Cp - overall level of magnetic activity
-                          #  -- 18
-    int(line_str[62:65])  # INTERNATIONAL SUNSPOT NUMBER.  -- 19
+                            #  -- 18
+    int(line_str[62:65])    # INTERNATIONAL SUNSPOT NUMBER.  -- 19
     ]
 
 def read_idx(filepath):
