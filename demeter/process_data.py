@@ -9,17 +9,17 @@ def plot_hist2 (hist, axis_labels=['x', 'y'], lognorm=False):
     plt.xlabel(axis_labels[0])
     plt.ylabel(axis_labels[1])
     
-    aspect = (hist[1][-1] - hist[1][0]) / (hist[2][-1] - hist[2][0])
+    aspect = (hist[1][-1] - hist[1][0]) / (hist[2][-1] - hist[2][0]) * 0.95
     
     if lognorm:
         from matplotlib.colors import LogNorm
         plt.imshow(np.rot90(hist[0]),
         extent=[ hist[1][0], hist[1][-1], hist[2][0], hist[2][-1] ],
-        cmap='YlGnBu', norm=LogNorm(), aspect=aspect * 0.95)
+        cmap='YlGnBu', norm=LogNorm(), aspect)
     else:
         plt.imshow(np.rot90(hist[0]),
         extent=[ hist[1][0], hist[1][-1], hist[2][0], hist[2][-1] ],
-        cmap='YlGnBu', aspect=aspect * 0.95)
+        cmap='YlGnBu', aspect)
         
     cbar = plt.colorbar()
 
