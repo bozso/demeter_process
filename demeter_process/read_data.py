@@ -165,7 +165,7 @@ def read_idx(filepath):
                         ('kp_sum', data.dtype),
                         ('sunspot', data.dtype) ] )
     
-    idx_whole['cnesjd'] = cjd_whole = np.arange(start, stop + 1)
+    idx_whole['cnesjd'] = np.arange(start, stop + 1)
     idx_whole['kp_sum'] = data[:,8]
     idx_whole['ap'] = data[:,17]
     idx_whole['cp'] = data[:,18]
